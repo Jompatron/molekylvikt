@@ -1,3 +1,5 @@
+"Koden är inspirerad av Linda Kanns exempelkod"
+
 from molgrafik import *
 from hashtest import *
 
@@ -98,6 +100,7 @@ class Stack:
 class Grammatikfel(Exception):
     pass
 
+
 class Ruta:
     def __init__(self, atom = "()", num = 1):
         self.atom = atom
@@ -105,7 +108,7 @@ class Ruta:
         self.next=None
         self.down=None
 
-
+# Läser molekylen genom att kalla på group och/eller group samt molekyl rekursivt
 def readMolekyl(q, z):
     mol = readGroup(q, z)
     if q.peek() == ".":
@@ -117,12 +120,12 @@ def readMolekyl(q, z):
             return mol
     else:
         mol.next = readMolekyl(q, z) 
-        
     return mol
 
 
+# Läser gruppen beroende på om det är en ensam atom, atom och molekyl, eller ett antal molekyler
 def readGroup(q, z):
-    rutan = Ruta()
+    rutan = Ruta() #skapar objekt från klassen Ruta
     if q.peek() == ".":
         raise Grammatikfel("Felaktig gruppstart vid radslutet")
     elif q.peek() in number:
@@ -132,12 +135,11 @@ def readGroup(q, z):
         if q.peek() == ".":
             return rutan
         if q.peek() in number:
-            rutan.num = int(readNum(q))
+            rutan.num = int(readNum(q)) #Här sparas antalet av atomen
         
-
-    elif q.peek() == "(":
+    elif q.peek() == "(": #indikerar parentesgrupp 
         z.store(q.dequeue())
-        rutan.down = readMolekyl(q, z)
+        rutan.down = readMolekyl(q, z) #returnerar delmolekyl
         if q.peek() != ")":
             raise Grammatikfel("Saknad högerparentes vid radslutet")
         if q.peek() == ".":
@@ -147,13 +149,14 @@ def readGroup(q, z):
             q.dequeue()
             if q.peek() == ".":
                 raise Grammatikfel("Saknad siffra vid radslutet")
-            rutan.num = int(readNum(q))
+            rutan.num = int(readNum(q)) #Här sparas antalet av molekylen (utanför ())
     else:
         raise Grammatikfel("Felaktig gruppstart vid radslutet")
 
     return rutan
 
 
+# Kollar så atomen finns i periodiska systemet och returnerar atomen
 def readAtom(q):
     if q.peek() in period:
         first = q.dequeue()
@@ -183,6 +186,7 @@ def readAtom(q):
             raise Grammatikfel("Okänd atom vid radslutet")
 
 
+# Kollar så liten bokstav är korrekt 
 def readLetter(q):
     word = q.peek()
     if word in small:
@@ -191,6 +195,7 @@ def readLetter(q):
     raise Grammatikfel("Fel: Ska följa med liten bokstav: ")
 
 
+# Kollar så siffran är korrekt
 def readNum(q):
     if q.peek() == "0":
         q.dequeue()
@@ -199,14 +204,14 @@ def readNum(q):
         first = q.dequeue()
         second = q.peek()
         if second in number:
-            num = ""
+            num = "" # blir sträng med siffrorna som följer atomen
             while q.peek() in number:
                 num = num + q.dequeue()
             return num
         else:
             raise Grammatikfel("För litet tal vid radslutet")
-    elif q.peek() in number:
-        nu = ""
+    elif q.peek() in number: # Om vi inte har ett specialfall som 1 för då måste det finnas en annan siffra som följer
+        nu = "" 
         while q.peek() in number:
             nu = nu + q.dequeue()
         return nu
@@ -214,6 +219,7 @@ def readNum(q):
         raise Grammatikfel("Saknad siffra vid radslutet")
 
 
+# Skapar kö av molekylen
 def storeMolekyl(molekyl):
     q = LinkedQ()
     for letter in molekyl:
@@ -221,6 +227,7 @@ def storeMolekyl(molekyl):
     return q
 
 
+# Beräknar resten av vad som ska skrivas ut då molekylen är felaktig
 def printRest(q):
     rest = " "
     while not q.isEmpty():
@@ -238,7 +245,7 @@ def weigh(ruta):
             x = float(weigh(ruta.down)) * float(ruta.num)
 
     else:
-        x = float(hashadeAtomer.search(ruta.atom).value.vikt) * float(ruta.num)
+        x = float(hashadeAtomer.search(ruta.atom).value.vikt) * float(ruta.num) # "vikt" finns i hashtest
 
     if ruta.next is not None:
         y = weigh(ruta.next)
@@ -247,6 +254,7 @@ def weigh(ruta):
         return x
 
 
+# Skriver ut om det är en korrekt molekyl eller ej
 def kollaGrammatiken(molekyl):
     molekyl = molekyl + "."
     q = storeMolekyl(molekyl)
@@ -259,6 +267,7 @@ def kollaGrammatiken(molekyl):
         print(str(fel) + printRest(q)) 
 
 
+
 def main():
     q = LinkedQ()
     molekyl = input()
@@ -269,10 +278,9 @@ def main():
             pass
         else:
             #print(mol)
-            mg.show(mol)
+            mg.show(mol) # Här anropar vi molgrafikens show-funktion, trädet skapas av klassen Ruta där vi lägger till fler och fler rutor med atomer
             molekyl = input()
 
 
 if __name__ == '__main__':
     main()
-
