@@ -19,13 +19,10 @@ period = ["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al"
         "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf",
         "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn",
         "Fl", "Lv"]
-
 small = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
          'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-
 big = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-
 number = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 
@@ -101,6 +98,13 @@ class Stack:
 class Grammatikfel(Exception):
     pass
 
+class Ruta:
+    def __init__(self, atom = "()", num = 1):
+        self.atom = atom
+        self.num = num
+        self.next=None
+        self.down=None
+
 
 def readMolekyl(q, z):
     mol = readGroup(q, z)
@@ -112,7 +116,8 @@ def readMolekyl(q, z):
         else:
             return mol
     else:
-        mol.next = readMolekyl(q, z)
+        mol.next = readMolekyl(q, z) 
+        
     return mol
 
 
@@ -126,10 +131,9 @@ def readGroup(q, z):
         rutan.atom = readAtom(q)
         if q.peek() == ".":
             return rutan
-        elif q.peek() in number:
+        if q.peek() in number:
             rutan.num = int(readNum(q))
-        else:
-            return
+        
 
     elif q.peek() == "(":
         z.store(q.dequeue())
@@ -162,6 +166,7 @@ def readAtom(q):
                 raise Grammatikfel("Okänd atom vid radslutet ")
         else:
             return first
+            
     elif q.peek() in small:
         raise Grammatikfel("Saknad stor bokstav vid radslutet")
     else:
@@ -211,14 +216,9 @@ def readNum(q):
 
 def storeMolekyl(molekyl):
     q = LinkedQ()
-
     for letter in molekyl:
-
         q.enqueue(letter)
     return q
-
-
-
 
 
 def printRest(q):
@@ -230,6 +230,8 @@ def printRest(q):
     return rest
 
 
+# Inspiration hittad på Internet
+# Arvid Larzzon/tilda-labbar på GitHub
 def weigh(ruta):
     if ruta.atom == "()":
         if ruta.down is not None:
@@ -251,10 +253,11 @@ def kollaGrammatiken(molekyl):
     z = Stack()
     try:
         mol = readMolekyl(q, z)
-        print("Formeln är syntaktiskt korrekt viken är", weigh(mol))
+        print("Formeln är syntaktiskt korrekt! Vikten är", weigh(mol))
         return mol
     except Grammatikfel as fel:
-        return str(fel) + printRest(q)
+        print(str(fel) + printRest(q)) 
+
 
 def main():
     q = LinkedQ()
@@ -265,7 +268,7 @@ def main():
         if mol is str():
             pass
         else:
-            print(mol)
+            #print(mol)
             mg.show(mol)
             molekyl = input()
 
